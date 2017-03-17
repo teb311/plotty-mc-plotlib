@@ -1,0 +1,13 @@
+{
+  "name": "plotty-mat-plt-face",
+  "version": "0.0.1",
+  "description": "A Webapp's whose existance is based on matplotlib's frustratingly terrible charts.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tyler Elliot Bettilyon",
+  "license": "MIT"
+}
