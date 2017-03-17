@@ -1,8 +1,11 @@
+/* TODO: Remove this ugly terrible no good hack */
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
 .plotty-mc.bar-chart {
-  font: 10px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 3px;
-  margin: 1px;
-  color: white;
+}
+
+.plotty-mc.bar-chart svg {
 }
