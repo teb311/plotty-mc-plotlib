@@ -8,4 +8,6 @@ html, body {
 }
 
 .plotty-mc.bar-chart svg {
+  font: 10px verdana;
+  text-align: center;
 }

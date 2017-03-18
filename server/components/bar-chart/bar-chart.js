@@ -1,19 +1,32 @@
-const testData = `
-[
-  {
-    "height": 200,
-    "label": "Oranges"
-  },
-  {
-    "height": 300,
-    "label": "Apples"
-  },
-  {
-    "height": 250,
-    "label": "Pears"
-  }
-]
-`
+const DEFAULTS = {
+  color: '#3182bd'
+}
+
+// const testData = `
+// [
+//   {
+//     "value": 200,
+//     "label": "Oranges"
+//   },
+//   {
+//     "value": 300,
+//     "label": "Apples"
+//   },
+//   {
+//     "value": 250,
+//     "label": "Pears"
+//   }
+// ]
+// `
+
+let testData = [];
+for(let i = 0; i < 26; i++) {
+  testData.push({
+    value: i * 10,
+    label: String.fromCharCode(65 + i) // ASCII
+  });
+}
+testData = JSON.stringify(testData); // I know, hilarious really.
 
 window.onload = function() {
   let barChart = document.createElement('bar-chart');
@@ -45,24 +58,24 @@ class BarD3Proto extends HTMLElement {
                              the format:
                              [
                               {
-                                height: Number,
+                                value: Number,
                                 label: string, // optional, Array index if not supplied
                               },
                               ...
                             ]
     @param {integer} barWidth The width of each bar, in pixels
   */
-  constructChart(barWidth) {
+  constructChart(barWidth, barColor = DEFAULTS.color) {
     // TODO: parameterize domain and range
-    let heights = this.data.map(d => d.height);
-    let maxHeight = Math.max(...heights);
+    let values = this.data.map(d => d.value);
+    let maxvalue = Math.max(...values);
     let width = (barWidth * this.data.length + 2 * barWidth) || 500;
     barWidth = barWidth || width / this.data.length;
 
     // TODO: and replace below with append to svg
     this.svg = d3.select(this)
       .append("svg")
-      .attr("height", maxHeight + 100) //TODO: Magic 100 padding voodoo removal
+      .attr("height", maxvalue + 100) //TODO: Magic 100 padding voodoo removal
       .attr("width", width);
 
 
@@ -72,15 +85,15 @@ class BarD3Proto extends HTMLElement {
         .attr("transform", (d, i) => `translate(${(barWidth + 5) * i}, 100)`); //TODO: Magic 5 padding voodoo removal
 
     bar.append("rect")
-        .attr("y", d => maxHeight - d.height)
+        .attr("y", d => maxvalue - d.value)
         .attr("width", barWidth)
-        .attr("height", d => d.height);
+        .attr("height", d => d.value)
+        .attr("fill", DEFAULTS.color);
 
     bar.append("text")
-        .attr("x", (barWidth / 2) - 10) //TODO: Magic 10 padding voodoo removal
-        .attr("y", d => (maxHeight - d.height) - 10) //TODO: Magic 50 padding voodoo removal
-        // .attr("dy", ".35em")
-        .text(d => d.label);
+        .attr("y", d => (maxvalue - d.value) - 10) //TODO: Magic 50 padding voodoo removal
+        .attr("x", barWidth / 2) // TODO: not perfect -- subtract width of self
+        .text(d => d.label); //TODO: Rotate
   }
 }
 
