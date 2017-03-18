@@ -2,28 +2,12 @@ const DEFAULTS = {
   color: '#3182bd'
 }
 
-// const testData = `
-// [
-//   {
-//     "value": 200,
-//     "label": "Oranges"
-//   },
-//   {
-//     "value": 300,
-//     "label": "Apples"
-//   },
-//   {
-//     "value": 250,
-//     "label": "Pears"
-//   }
-// ]
-// `
-
 let testData = [];
 for(let i = 0; i < 26; i++) {
   testData.push({
-    value: i * 10,
-    label: String.fromCharCode(65 + i) // ASCII
+    value: 30 + Math.random() * 200,
+    units: "Unknown",
+    label: String.fromCharCode(65 + i) + String.fromCharCode(97 + i).repeat(4) // ASCII
   });
 }
 testData = JSON.stringify(testData); // I know, hilarious really.
@@ -69,30 +53,68 @@ class BarD3Proto extends HTMLElement {
     // TODO: parameterize domain and range
     let values = this.data.map(d => d.value);
     let maxvalue = Math.max(...values);
-    let width = (barWidth * this.data.length + 2 * barWidth) || 500;
-    barWidth = barWidth || width / this.data.length;
+    let svgWidth = (barWidth * this.data.length + 2 * barWidth) || 500;
+    barWidth = barWidth || svgWidth / this.data.length;
+
+    // Yessss, do you love this?!
+    // TODO: Dependency inject these later, so hot.
+    function height(dataPoint, index) {
+      return dataPoint.value;
+    }
+
+    function width(dataPoint, index) {
+      return barWidth;
+    }
+
+    const padding = 5; // TODO: upgrade
+    function x(dataPoint, index) {
+      return (barWidth + padding) * index;
+    }
+
+    function y(dataPoint, index) {
+      return maxvalue - dataPoint.value;
+    }
+
+    function fill(dataPoint, index) {
+      return dataPoint.color || DEFAULTS.color
+    }
+
+    function textRotate(dataPoint, index) {
+      let rotX = x(dataPoint, index);
+      let degrees = 270;
+      let botPadding = 2;
+      return `rotate(${degrees} ${rotX} ${maxvalue}) translate(${botPadding} ${barWidth / 2})`
+    }
+
+    function gTranlate(dataPoint, index) {
+      return `translate(${x(dataPoint, index)}, 0})`;
+    }
 
     // TODO: and replace below with append to svg
     this.svg = d3.select(this)
       .append("svg")
       .attr("height", maxvalue + 100) //TODO: Magic 100 padding voodoo removal
-      .attr("width", width);
+      .attr("width", svgWidth);
 
 
     var bar = this.svg.selectAll("g")
         .data(this.data)
-      .enter().append("g")
-        .attr("transform", (d, i) => `translate(${(barWidth + 5) * i}, 100)`); //TODO: Magic 5 padding voodoo removal
+        .enter().append("g")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("transform", gTranlate)
 
     bar.append("rect")
-        .attr("y", d => maxvalue - d.value)
-        .attr("width", barWidth)
-        .attr("height", d => d.value)
+        .attr("y", y)
+        .attr("x", x)
+        .attr("width", width)
+        .attr("height", height)
         .attr("fill", DEFAULTS.color);
 
     bar.append("text")
-        .attr("y", d => (maxvalue - d.value) - 10) //TODO: Magic 50 padding voodoo removal
-        .attr("x", barWidth / 2) // TODO: not perfect -- subtract width of self
+        .attr("y", maxvalue)
+        .attr("x", x)
+        .attr("transform", textRotate)
         .text(d => d.label); //TODO: Rotate
   }
 }
